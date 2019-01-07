@@ -8,8 +8,7 @@ How to use Application Insights to do distributed tracing through a Web App, RES
 To trace a call through a Web App, REST API, Azure Function (blob trigger event), Azure Function (service bus), Azure Data Factory, Azure Databricks and Spark Notebook.
 
 ### Here is the pipeline I want build to track telemetry between tiers:
-![alt text](https://raw.githubusercontent.com/AdamPaternostro/Azure-App-Insights-Distrubuted-Tracing/master/Architecture.png "Architecture")
-
+![alt tag](https://raw.githubusercontent.com/AdamPaternostro/Azure-App-Insights-Distrubuted-Tracing/master/Architecture.png)
 
 
 1.  A Web App (single page application – aka Angular)
