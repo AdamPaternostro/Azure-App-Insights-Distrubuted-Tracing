@@ -32,7 +32,9 @@ To trace a call through a Web App, REST API, Azure Function (blob trigger event)
         -  Set the Telemetry Operation Parent Id to the Request Telemetry Id
     - The blob will be saved with the following meta-data
         - Request-Context: appId=cid “The App Id of the current App Insights Account”
-        -  Request-Id / traceparent:  “The Id of the Track Dependency”
+          - NOTE: A "-" is not allowed.  Using RequestContext.
+        - Request-Id / traceparent:  “The Id of the Track Dependency”
+          - NOTE: A "-" is not allowed.  Using RequestId.
         - Traceoperation “The Operation Id of the Track Dependency”
 
 3. An Azure Function detects the blob trigger
@@ -177,3 +179,10 @@ Created in the below order
 
 ### References
 - https://github.com/Microsoft/ApplicationInsights-aspnetcore/wiki/Getting-Started-with-Application-Insights-for-ASP.NET-Core
+
+
+### To do
+- Environment Variables for everything (DONE)
+- Creatd a file named SetEnvironmentVariables.sh so I can run locally
+- Document the SetEnvironmentVariables.sh
+- Service Bus: https://docs.microsoft.com/en-us/azure/azure-monitor/app/custom-operations-tracking

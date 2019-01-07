@@ -6,15 +6,24 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace MyRESTAPI.Controllers
 {
+
+
     [Route("api/[controller]")]
     [ApiController]
     public class ValuesController : ControllerBase
     {
+
+
+
         // GET api/values
         [HttpGet]
         public ActionResult<IEnumerable<string>> Get()
         {
-            return new string[] { "value1", "value2" };
+            // NOTE: This should be within an Application Insights Request
+            string fileName = Guid.NewGuid().ToString() + ".csv";
+            GenerateBlob generateBlob = new GenerateBlob();
+            generateBlob.CreateBlob(fileName);
+            return new string[] { fileName };
         }
 
         // GET api/values/5
