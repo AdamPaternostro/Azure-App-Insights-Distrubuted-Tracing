@@ -1,6 +1,9 @@
 # Azure-App-Insights-Distrubuted-Tracing
 How to use Application Insights to do distributed tracing through a Web App, REST API, Function App, Service Bus, Databricks and Data Factory.
 
+# NOTE
+# Please note this is a work in progress!
+
 ## Goal
 To trace a call through a Web App, REST API, Azure Function (blob trigger event), Azure Function (service bus), Azure Data Factory, Azure Databricks and Spark Notebook.
 
