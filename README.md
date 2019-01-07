@@ -8,6 +8,10 @@ How to use Application Insights to do distributed tracing through a Web App, RES
 To trace a call through a Web App, REST API, Azure Function (blob trigger event), Azure Function (service bus), Azure Data Factory, Azure Databricks and Spark Notebook.
 
 ### Here is the pipeline I want build to track telemetry between tiers:
+![alt text](https://raw.githubusercontent.com/AdamPaternostro/Azure-App-Insights-Distrubuted-Tracing/master/Architecture.png "Architecture")
+
+
+
 1.  A Web App (single page application – aka Angular)
     - The Web App will have App Insights JavaScript on each web page
     - The Web App will have the App Insights SDK
@@ -99,36 +103,78 @@ To trace a call through a Web App, REST API, Azure Function (blob trigger event)
 All resources in East US
 Created in the below order
 
-- Storage:        
-   - Blob:           00disttraceblob
+### Azure Storage
+|  Storage |   | 
+|---|---|
+|  Blob |  00disttraceblob |
 
-- Web Frontend
-   - App Insights:   01-disttrace-web-app
-   - App Service:    01-disttrace-app-service
-   - Web App:        01-disttrace-web-app
+### Web Frontend         
+|  MyWebSite |   | 
+|---|---|
+|  App Insights |  01-disttrace-web-app |
+|  App Service |  01-disttrace-app-service |
+|  Web App |  01-disttrace-web-app |
 
-- REST API
-   - App Insights:   02-disttrace-web-app
-   - App Service:    02-disttrace-app-service
-   - Web App:        02-disttrace-web-app
+### REST API
+|  MyRESTAPI |   | 
+|---|---|
+|  App Insights |  02-disttrace-web-app |
+|  App Service |  02-disttrace-app-service |
+|  Web App |  02-disttrace-web-app |
 
-- Azure Function - Comsumption Plan - (Blob Trigger)
-   - App Insights:   03-disttrace-func-blob
-   - Function:       03-disttrace-func-blob      (use 00disttraceblob storage account)    
+### Azure Function
+|  Azure Function - Comsumption Plan - (Blob Trigger) |   | 
+|---|---|
+|  App Insights |  03-disttrace-func-blob |
+|  Function |  03-disttrace-func-blob      (use 00disttraceblob storage account) |
 
-- Azure Function (Service Bus)
-   - App Insights:   04-disttrace-func-bus
-   - Function:       04-disttrace-func-bus       (use 00disttraceblob storage account)    
+### Azure Function
+|  Azure Function (Service Bus) |   | 
+|---|---|
+|  App Insights |  04-disttrace-func-bus |
+|  Function |  04-disttrace-func-bus       (use 00disttraceblob storage account)    |
 
-- Azure Data Factory
-   - App Insights:   05-disttrace-app-insights   (type general)
-   - Data Factory:   05-disttrace-adf
-   - Function:       05-disttrace-func-helper    (use 00disttraceblob storage account | No App Insights)    
+### Azure Data Factory
+|  Azure Data Factory |   | 
+|---|---|
+|  App Insights |  05-disttrace-app-insights   (type general) |
+|  Data Factory |  05-disttrace-adf |
+|  Function |  05-disttrace-func-helper    (use 00disttraceblob storage account | No App Insights)   |
 
-- Databricks
-   - App Insights:   06-disttrace-app-insights   (type general)
-   - Workspace:      06-disttrace-databricks
+### Databricks
+|  Databricks |   | 
+|---|---|
+|  App Insights |  06-disttrace-app-insights   (type general) |
+|  Workspace |  06-disttrace-databricks |
 
-- Service Bus:
-   - Bus:            z07-disttrace-service-bus
+### Service Bus
+|  Service Bus |   | 
+|---|---|
+|  Bus |  z07-disttrace-service-bus |
+       
 
+- dotnet new mvc --name MyWebSite
+- cd MyWebSite
+- dotnet restore
+- dotnet build
+- dotnet add package Microsoft.ApplicationInsights.AspNetCore --version 2.5.1
+- dotnet build
+- updated appsettings (Development) with the App Insights Key
+- updated program.cs with .UseApplicationInsights()
+- updated ViewImports and _Layout to add Javascript App Insights
+- dotnet build
+
+- dotnet new webapi --name MyRESTAPI
+- cd MyWebSite
+- dotnet restore
+- dotnet build
+- dotnet add package Microsoft.ApplicationInsights.AspNetCore --version 2.5.1
+- dotnet add package WindowsAzure.Storage --version 9.3.3
+- updated appsettings (Development) with the App Insights Key
+- updated program.cs with .UseApplicationInsights()
+- dotnet build
+- dotnet run
+- https://localhost:5001/api/values
+
+### References
+- https://github.com/Microsoft/ApplicationInsights-aspnetcore/wiki/Getting-Started-with-Application-Insights-for-ASP.NET-Core
