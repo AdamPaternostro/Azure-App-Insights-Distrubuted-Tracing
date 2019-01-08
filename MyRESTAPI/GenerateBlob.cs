@@ -11,10 +11,13 @@ namespace MyRESTAPI
         // The request is part of the parent request (since)
         public void CreateBlob(string fileName)
         {
+            ///////////////////////////////////////////////////
+            // Grab existing 
+            ///////////////////////////////////////////////////
             Microsoft.ApplicationInsights.TelemetryClient telemetryClient = new Microsoft.ApplicationInsights.TelemetryClient();
             telemetryClient.Context.User.AuthenticatedUserId = "adam.paternostro@microsoft.com";
 
-            string commonOperationId = telemetryClient.Context.Operation.Id;
+            string commonOperationId = null;
             string parentId = null;
             System.Console.WriteLine("telemetryClient.Context.Operation.Id: " + telemetryClient.Context.Operation.Id);
             System.Console.WriteLine("telemetryClient.Context.Session.Id: " + telemetryClient.Context.Session.Id);
@@ -24,30 +27,45 @@ namespace MyRESTAPI
             using (var requestTelemetry = telemetryClient.StartOperation<Microsoft.ApplicationInsights.DataContracts.RequestTelemetry>
                  ("CreateBlob"))
             {
-                if (string.IsNullOrWhiteSpace(commonOperationId))
+                ///////////////////////////////////////////////////
+                // Request Telemetry
+                ///////////////////////////////////////////////////
+                requestTelemetry.Telemetry.Context.User.AuthenticatedUserId = "adam.paternostro@microsoft.com";
+
+                if (!string.IsNullOrWhiteSpace(commonOperationId))
                 {
-                    commonOperationId = requestTelemetry.Telemetry.Context.Operation.Id;
-                    System.Console.WriteLine("commonOperationId = requestTelemetry.Telemetry.Context.Operation.Id: " + commonOperationId);
-                }
-                if (string.IsNullOrWhiteSpace(parentId))
-                {
-                    parentId = requestTelemetry.Telemetry.Id;
-                    System.Console.WriteLine("parentId = requestTelemetry.Telemetry.Id: " + parentId);
+                    // Use the existing common operation id
+                    requestTelemetry.Telemetry.Context.Operation.Id = commonOperationId;
+                    System.Console.WriteLine("[Use existing] commonOperationId: " + commonOperationId);
                 }
                 else
                 {
-                    // This should be set by application insight automatically since we are in a scope of an HTTP request
-                    // requestTelemetry.Telemetry.Context.Operation.ParentId = parentId;
+                    // Set the commonOperationId (we did not know it until now)
+                    commonOperationId = requestTelemetry.Telemetry.Context.Operation.Id;
+                    System.Console.WriteLine("[Set the] commonOperationId = requestTelemetry.Telemetry.Context.Operation.Id: " + commonOperationId);
                 }
-                //requestTelemetry.Telemetry.Context.Operation.Id = commonOperationId;
 
+                if (!string.IsNullOrWhiteSpace(parentId))
+                {
+                    // Use the existing parentId
+                    requestTelemetry.Telemetry.Context.Operation.ParentId = parentId;
+                    System.Console.WriteLine("[Use existing] parentId: " + parentId);
+                }
+                else
+                {
+                    parentId = requestTelemetry.Telemetry.Id;
+                    System.Console.WriteLine("[Set the] parentId = requestTelemetry.Telemetry.Id: " + parentId);
+                }
                 // Store future parent id
                 parentId = requestTelemetry.Telemetry.Id;
                 System.Console.WriteLine("parentId = requestTelemetry.Telemetry.Id: " + parentId);
-                requestTelemetry.Telemetry.Context.User.AuthenticatedUserId = "adam.paternostro@microsoft.com";
 
-                // create a future dependency of the Azure Function
-                string operationName = "Operation Name: Saved CSV for Blob Storage";
+
+                ///////////////////////////////////////////////////
+                // Create Dependency for future Azure Function processing
+                // Also the blob save is tracked under here (we need the dependencyTelemetry.Id to place in the blob metadata)
+                ///////////////////////////////////////////////////
+                string operationName = "Save CSV to Blob Storage";
                 string target = "Target: Azure Function -> 03-disttrace-func-blob";
                 string dependencyName = "Dependency Name: Azure Function Blob Trigger";
                 Microsoft.ApplicationInsights.DataContracts.DependencyTelemetry dependencyTelemetry =
@@ -61,6 +79,10 @@ namespace MyRESTAPI
                 System.Console.WriteLine("parentId = dependencyTelemetry.Id: " + parentId);
                 telemetryClient.TrackDependency(dependencyTelemetry);
 
+
+                ///////////////////////////////////////////////////
+                // Blob code
+                ///////////////////////////////////////////////////
                 string containerName = "appinsightstest";
                 string storageConnectionString = System.Environment.GetEnvironmentVariable("ai_storage_key");
                 CloudStorageAccount storageAccount = null;
@@ -106,7 +128,9 @@ namespace MyRESTAPI
                 }
             } // using
 
-            // for debuging
+            ///////////////////////////////////////////////////
+            // For Debugging
+            ///////////////////////////////////////////////////
             telemetryClient.Flush();
 
         } // Create Blob

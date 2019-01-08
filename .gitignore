@@ -1,1 +1,7 @@
 SetEnvironmentVariables.sh
+MyWebSite/obj/Debug/netcoreapp2.1/MyWebSite.csprojAssemblyReference.cache
+MyRESTAPI/bin/Debug/netcoreapp2.1/MyRESTAPI.dll
+MyRESTAPI/bin/Debug/netcoreapp2.1/MyRESTAPI.pdb
+MyRESTAPI/obj/Debug/netcoreapp2.1/MyRESTAPI.dll
+MyRESTAPI/obj/Debug/netcoreapp2.1/MyRESTAPI.pdb
+MyRESTAPI/obj/Debug/netcoreapp2.1/MyRESTAPI.csprojAssemblyReference.cache
