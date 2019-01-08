@@ -25,7 +25,7 @@ namespace MyRESTAPI
 
 
             using (var requestTelemetry = telemetryClient.StartOperation<Microsoft.ApplicationInsights.DataContracts.RequestTelemetry>
-                 ("CreateBlob"))
+                 ("CreateBlob: " + fileName))
             {
                 ///////////////////////////////////////////////////
                 // Request Telemetry
@@ -61,23 +61,25 @@ namespace MyRESTAPI
                 System.Console.WriteLine("parentId = requestTelemetry.Telemetry.Id: " + parentId);
 
 
+
                 ///////////////////////////////////////////////////
                 // Create Dependency for future Azure Function processing
-                // Also the blob save is tracked under here (we need the dependencyTelemetry.Id to place in the blob metadata)
+                // NOTE: I trick it by giving a Start Time OFfset of Now.AddSeconds(1), so it sorts correctly in the Azure Portal UI
                 ///////////////////////////////////////////////////
-                string operationName = "Save CSV to Blob Storage";
-                string target = "Target: Azure Function -> 03-disttrace-func-blob";
+                string operationName = "Dependency: Blob Event";
+                string target = "03-disttrace-func-blob";
                 string dependencyName = "Dependency Name: Azure Function Blob Trigger";
                 Microsoft.ApplicationInsights.DataContracts.DependencyTelemetry dependencyTelemetry =
                    new Microsoft.ApplicationInsights.DataContracts.DependencyTelemetry(
                     operationName, target, dependencyName,
-                    "console-app", System.DateTimeOffset.Now, System.TimeSpan.FromSeconds(1), "200", true);
+                    "02-disttrace-web-app", System.DateTimeOffset.Now.AddSeconds(1), System.TimeSpan.FromSeconds(2), "200", true);
                 dependencyTelemetry.Context.Operation.Id = commonOperationId;
                 dependencyTelemetry.Context.Operation.ParentId = requestTelemetry.Telemetry.Id;
                 // Store future parent id
                 parentId = dependencyTelemetry.Id;
                 System.Console.WriteLine("parentId = dependencyTelemetry.Id: " + parentId);
-                telemetryClient.TrackDependency(dependencyTelemetry);
+               telemetryClient.TrackDependency(dependencyTelemetry);
+
 
 
                 ///////////////////////////////////////////////////
@@ -108,6 +110,10 @@ namespace MyRESTAPI
 
                 Microsoft.WindowsAzure.Storage.Blob.CloudBlockBlob blob = container.GetBlockBlobReference(fileName);
 
+                ///////////////////////////////////////////////////
+                // Set the blob's meta data
+                // We need the values from the dependency
+                ///////////////////////////////////////////////////
                 // Request-Context: appId=cid “The App Id of the current App Insights Account”
                 System.Console.WriteLine("ai_02_disttrace_web_app_appkey: appId=cid-v1:" + System.Environment.GetEnvironmentVariable("ai_02_disttrace_web_app_appkey"));
                 blob.Metadata.Add("RequestContext", "appId=cid-v1:" + System.Environment.GetEnvironmentVariable("ai_02_disttrace_web_app_appkey"));
@@ -122,10 +128,13 @@ namespace MyRESTAPI
                 System.Console.WriteLine("commonOperationId: " + commonOperationId);
                 blob.Metadata.Add("traceoperation", commonOperationId);
 
+
                 using (System.IO.MemoryStream memoryStream = new System.IO.MemoryStream(System.Text.Encoding.UTF8.GetBytes(text)))
                 {
                     blob.UploadFromStreamAsync(memoryStream).Wait();
                 }
+
+                telemetryClient.StopOperation(requestTelemetry);
             } // using
 
             ///////////////////////////////////////////////////
