@@ -63,7 +63,7 @@ public static void Run(Stream myBlob, string name, ILogger log)
         // NOTE: I trick it by giving a Start Time OFfset of Now.AddSeconds(1), so it sorts correctly in the Azure Portal UI
         ///////////////////////////////////////////////////
         string operationName = "Dependency: Service Bus Event";
-        string target = "04-disttrace-func-bus";
+        string target = "03-disttrace-func-blob | cid-v1:" + System.Environment.GetEnvironmentVariable("ai_04_disttrace_web_app_appkey");
         string dependencyName = "Dependency Name: Azure Function Service Bus";
         Microsoft.ApplicationInsights.DataContracts.DependencyTelemetry dependencyTelemetry =
             new Microsoft.ApplicationInsights.DataContracts.DependencyTelemetry(

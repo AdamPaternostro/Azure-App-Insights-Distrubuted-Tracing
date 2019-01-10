@@ -67,7 +67,9 @@ namespace MyRESTAPI
                 // NOTE: I trick it by giving a Start Time OFfset of Now.AddSeconds(1), so it sorts correctly in the Azure Portal UI
                 ///////////////////////////////////////////////////
                 string operationName = "Dependency: Blob Event";
-                string target = "03-disttrace-func-blob";
+                // Set the target so it points to the "dependent" app insights account app id
+                // string target = "03-disttrace-func-blob | cid-v1:676560d0-81fb-4e5b-bfdd-7da1ad11c866"
+                string target = "03-disttrace-func-blob | cid-v1:" + System.Environment.GetEnvironmentVariable("ai_03_disttrace_web_app_appkey");
                 string dependencyName = "Dependency Name: Azure Function Blob Trigger";
                 Microsoft.ApplicationInsights.DataContracts.DependencyTelemetry dependencyTelemetry =
                    new Microsoft.ApplicationInsights.DataContracts.DependencyTelemetry(

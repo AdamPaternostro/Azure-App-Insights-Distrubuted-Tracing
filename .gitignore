@@ -1,5 +1,5 @@
 SetEnvironmentVariables.sh
-MyWebSite/bin/**
-MyWebSite/obj/**
-MyRESTAPI/bin/**
-MyRESTAPI/obj/**
+01-disttrace-web-app/bin/**
+01-disttrace-web-app/obj/**
+02-disttrace-web-app/bin/**
+02-disttrace-web-app/obj/**
