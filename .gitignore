@@ -1,4 +1,5 @@
 SetEnvironmentVariables.sh
-MyWebSite/obj/
-MyRESTAPI/bin/
-
+MyWebSite/bin/**
+MyWebSite/obj/**
+MyRESTAPI/bin/**
+MyRESTAPI/obj/**

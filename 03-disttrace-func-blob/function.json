@@ -1,0 +1,11 @@
+{
+  "bindings": [
+    {
+      "name": "myBlob",
+      "type": "blobTrigger",
+      "direction": "in",
+      "path": "appinsightstest/{name}",
+      "connection": "ai_storage_key"
+    }
+  ]
+}

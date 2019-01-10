@@ -177,6 +177,13 @@ Created in the below order
 - dotnet run
 - https://localhost:5001/api/values
 
+- create a service bus queue in the portal (name: appinsightstest)
+  - create a sas policy named ai_bus_key that has send and listen access
+- create Azure function in portal (blob trigger) - paste in code 03-disttrace-func-blob.cs
+  - add environment variables
+  - ai_bus_key
+  - ai_storage_key
+
 ### References
 - https://github.com/Microsoft/ApplicationInsights-aspnetcore/wiki/Getting-Started-with-Application-Insights-for-ASP.NET-Core
 

@@ -1,5 +1,5 @@
 {
-  "ProjectFilePath": "/Users/adampaternostro/Azure-App-Insights-Distrubuted-Tracing/MyWebSite/MyWebSite.csproj",
+  "ProjectFilePath": "/Users/adampaternostro/Azure-App-Insights-Distrubuted-Tracing/01-disttrace-web-app/MyWebSite.csproj",
   "TargetFramework": "netcoreapp2.1",
   "TagHelpers": [],
   "Configuration": {

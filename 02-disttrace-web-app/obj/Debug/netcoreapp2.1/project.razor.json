@@ -1,5 +1,5 @@
 {
-  "ProjectFilePath": "/Users/adampaternostro/Azure-App-Insights-Distrubuted-Tracing/MyRESTAPI/MyRESTAPI.csproj",
+  "ProjectFilePath": "/Users/adampaternostro/Azure-App-Insights-Distrubuted-Tracing/02-disttrace-web-app/MyRESTAPI.csproj",
   "TargetFramework": "netcoreapp2.1",
   "TagHelpers": [],
   "Configuration": {
