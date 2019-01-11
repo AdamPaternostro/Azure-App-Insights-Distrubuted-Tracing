@@ -17,54 +17,60 @@ namespace MyRESTAPI
             Microsoft.ApplicationInsights.TelemetryClient telemetryClient = new Microsoft.ApplicationInsights.TelemetryClient();
             telemetryClient.Context.User.AuthenticatedUserId = "adam.paternostro@microsoft.com";
 
-            string commonOperationId = null;
-            string parentId = null;
+            string traceoperation = null;
+            string traceparent = null;
             System.Console.WriteLine("telemetryClient.Context.Operation.Id: " + telemetryClient.Context.Operation.Id);
             System.Console.WriteLine("telemetryClient.Context.Session.Id: " + telemetryClient.Context.Session.Id);
             System.Console.WriteLine("telemetryClient.Context.Operation.ParentId: " + telemetryClient.Context.Operation.ParentId);
 
+            Microsoft.ApplicationInsights.DataContracts.RequestTelemetry requestTelemetry = new Microsoft.ApplicationInsights.DataContracts.RequestTelemetry();
+            requestTelemetry.Name = "Create Blob: " + fileName;
+            //requestTelemetry.Source = requestContext.Replace("appId=",string.Empty);
+            requestTelemetry.Timestamp = System.DateTimeOffset.Now;
+            requestTelemetry.Context.Operation.Id = traceoperation;
+            requestTelemetry.Context.Operation.ParentId = traceparent;
+            requestTelemetry.Context.User.AuthenticatedUserId = "adam.paternostro@microsoft.com";
 
-            using (var requestTelemetry = telemetryClient.StartOperation<Microsoft.ApplicationInsights.DataContracts.RequestTelemetry>
-                 ("CreateBlob: " + fileName))
+            using (var requestBlock = telemetryClient.StartOperation<Microsoft.ApplicationInsights.DataContracts.RequestTelemetry>(requestTelemetry))
             {
                 ///////////////////////////////////////////////////
                 // Request Telemetry
                 ///////////////////////////////////////////////////
-                requestTelemetry.Telemetry.Context.User.AuthenticatedUserId = "adam.paternostro@microsoft.com";
+                requestBlock.Telemetry.Context.User.AuthenticatedUserId = "adam.paternostro@microsoft.com";
 
-                if (!string.IsNullOrWhiteSpace(commonOperationId))
+                if (!string.IsNullOrWhiteSpace(traceoperation))
                 {
                     // Use the existing common operation id
-                    requestTelemetry.Telemetry.Context.Operation.Id = commonOperationId;
-                    System.Console.WriteLine("[Use existing] commonOperationId: " + commonOperationId);
+                    requestBlock.Telemetry.Context.Operation.Id = traceoperation;
+                    System.Console.WriteLine("[Use existing] traceoperation: " + traceoperation);
                 }
                 else
                 {
-                    // Set the commonOperationId (we did not know it until now)
-                    commonOperationId = requestTelemetry.Telemetry.Context.Operation.Id;
-                    System.Console.WriteLine("[Set the] commonOperationId = requestTelemetry.Telemetry.Context.Operation.Id: " + commonOperationId);
+                    // Set the traceoperation (we did not know it until now)
+                    traceoperation = requestBlock.Telemetry.Context.Operation.Id;
+                    System.Console.WriteLine("[Set the] traceoperation = requestBlock.Telemetry.Context.Operation.Id: " + traceoperation);
                 }
 
-                if (!string.IsNullOrWhiteSpace(parentId))
+                if (!string.IsNullOrWhiteSpace(traceparent))
                 {
-                    // Use the existing parentId
-                    requestTelemetry.Telemetry.Context.Operation.ParentId = parentId;
-                    System.Console.WriteLine("[Use existing] parentId: " + parentId);
+                    // Use the existing traceparent
+                    requestBlock.Telemetry.Context.Operation.ParentId = traceparent;
+                    System.Console.WriteLine("[Use existing] traceparent: " + traceparent);
                 }
                 else
                 {
-                    parentId = requestTelemetry.Telemetry.Id;
-                    System.Console.WriteLine("[Set the] parentId = requestTelemetry.Telemetry.Id: " + parentId);
+                    traceparent = requestBlock.Telemetry.Id;
+                    System.Console.WriteLine("[Set the] traceparent = requestBlock.Telemetry.Id: " + traceparent);
                 }
                 // Store future parent id
-                parentId = requestTelemetry.Telemetry.Id;
-                System.Console.WriteLine("parentId = requestTelemetry.Telemetry.Id: " + parentId);
+                traceparent = requestBlock.Telemetry.Id;
+                System.Console.WriteLine("traceparent = requestBlock.Telemetry.Id: " + traceparent);
 
 
 
                 ///////////////////////////////////////////////////
                 // Create Dependency for future Azure Function processing
-                // NOTE: I trick it by giving a Start Time OFfset of Now.AddSeconds(1), so it sorts correctly in the Azure Portal UI
+                // NOTE: I trick it by giving a Start Time Offset of Now.AddSeconds(1), so it sorts correctly in the Azure Portal UI
                 ///////////////////////////////////////////////////
                 string operationName = "Dependency: Blob Event";
                 // Set the target so it points to the "dependent" app insights account app id
@@ -75,12 +81,12 @@ namespace MyRESTAPI
                    new Microsoft.ApplicationInsights.DataContracts.DependencyTelemetry(
                     operationName, target, dependencyName,
                     "02-disttrace-web-app", System.DateTimeOffset.Now.AddSeconds(1), System.TimeSpan.FromSeconds(2), "200", true);
-                dependencyTelemetry.Context.Operation.Id = commonOperationId;
-                dependencyTelemetry.Context.Operation.ParentId = requestTelemetry.Telemetry.Id;
+                dependencyTelemetry.Context.Operation.Id = traceoperation;
+                dependencyTelemetry.Context.Operation.ParentId = requestBlock.Telemetry.Id;
                 // Store future parent id
-                parentId = dependencyTelemetry.Id;
-                System.Console.WriteLine("parentId = dependencyTelemetry.Id: " + parentId);
-               telemetryClient.TrackDependency(dependencyTelemetry);
+                traceparent = dependencyTelemetry.Id;
+                System.Console.WriteLine("traceparent = dependencyTelemetry.Id: " + traceparent);
+                telemetryClient.TrackDependency(dependencyTelemetry);
 
 
 
@@ -116,19 +122,20 @@ namespace MyRESTAPI
                 // Set the blob's meta data
                 // We need the values from the dependency
                 ///////////////////////////////////////////////////
-                // Request-Context: appId=cid “The App Id of the current App Insights Account”
-                System.Console.WriteLine("ai_02_disttrace_web_app_appkey: appId=cid-v1:" + System.Environment.GetEnvironmentVariable("ai_02_disttrace_web_app_appkey"));
-                blob.Metadata.Add("RequestContext", "appId=cid-v1:" + System.Environment.GetEnvironmentVariable("ai_02_disttrace_web_app_appkey"));
+                // Request-Context: appId=cid-v1:{The App Id of the current App Insights Account}
+                string requestContext = "appId=cid-v1:" + System.Environment.GetEnvironmentVariable("ai_02_disttrace_web_app_appkey");
+                System.Console.WriteLine("Blob Metadata -> requestContext: " + requestContext);
+                blob.Metadata.Add("RequestContext", requestContext);
 
-                // Request-Id / traceparent: “The Id of the Track Dependency”
-                System.Console.WriteLine("RequestId: " + parentId);
-                blob.Metadata.Add("RequestId", parentId);
-                System.Console.WriteLine("traceparent: " + parentId);
-                blob.Metadata.Add("traceparent", parentId);
+                // Request-Id / traceparent: {parent request/operation id} (e.g. the Track Dependency)
+                System.Console.WriteLine("Blob Metadata -> RequestId: " + traceparent);
+                blob.Metadata.Add("RequestId", traceparent);
+                System.Console.WriteLine("Blob Metadata -> traceparent: " + traceparent);
+                blob.Metadata.Add("traceparent", traceparent);
 
-                // Traceoperation “The Operation Id of the Track Dependency”
-                System.Console.WriteLine("commonOperationId: " + commonOperationId);
-                blob.Metadata.Add("traceoperation", commonOperationId);
+                // Traceoperation {common operation id} (e.g. same operation id for all requests in this telemetry pipeline)
+                System.Console.WriteLine("Blob Metadata -> traceoperation: " + traceoperation);
+                blob.Metadata.Add("traceoperation", traceoperation);
 
 
                 using (System.IO.MemoryStream memoryStream = new System.IO.MemoryStream(System.Text.Encoding.UTF8.GetBytes(text)))
@@ -136,7 +143,9 @@ namespace MyRESTAPI
                     blob.UploadFromStreamAsync(memoryStream).Wait();
                 }
 
-                telemetryClient.StopOperation(requestTelemetry);
+                requestTelemetry.ResponseCode = "200";
+                requestTelemetry.Success = true;
+                telemetryClient.StopOperation(requestBlock);
             } // using
 
             ///////////////////////////////////////////////////

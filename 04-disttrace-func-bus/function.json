@@ -1,0 +1,12 @@
+{
+  "bindings": [
+    {
+      "name": "myQueueItem",
+      "type": "serviceBusTrigger",
+      "direction": "in",
+      "queueName": "appinsightstest",
+      "connection": "z07-disttrace-service-bus_ai_bus_key_SERVICEBUS"
+    }
+  ],
+  "disabled": false
+}
