@@ -32,7 +32,7 @@ To trace a call through a Web App, REST API, Azure Function (blob trigger event)
         - Set the Telemetry Parent Id
             - QUESTION: Do we have a parent at this point?
     - The REST API will need to create a Track Dependency
-        - Set the Target of the Dependency object to the a string that is "name | cid-v1:{GUID of the future app insights app id}"
+        - Set the Target of the Dependency object to the a string that is "name-of-future-app-insights-account | cid-v1:{GUID of the future app insights app id}"
         - Set the Telemetry Operation Id (assuming at this point it is the Request Telemetry’s Id)
         - Set the Telemetry Operation Parent Id to the Request Telemetry Id
     - The blob will be saved with the following meta-data
@@ -49,7 +49,7 @@ To trace a call through a Web App, REST API, Azure Function (blob trigger event)
         - Set the Telemetry Source (Blob metadata: Request-Context)
         - Set the Telemetry Parent (Blob metadata: Request-Id / traceparent)
     - The Azure Function will need to create a Track Dependency
-        - Set the Target of the Dependency object to the a string that is "name | cid-v1:{GUID of the future app insights app id}"
+        - Set the Target of the Dependency object to the a string that is "name-of-future-app-insights-account | cid-v1:{GUID of the future app insights app id}"
         - Set the Telemetry Operation Id (Blob metadata: Traceoperation)
         - Set the Telemetry Operation Parent Id to the Request Telemetry Id
     - The function will queue an item in Service Bus
@@ -66,7 +66,7 @@ To trace a call through a Web App, REST API, Azure Function (blob trigger event)
         - Set the Telemetry Source (Service Bus JSON payload: Request-Context)
         - Set the Telemetry Parent (Service Bus JSON payload: Request-Id / traceparent)
     - The Azure Function will need to create a Track Dependency
-        - Set the Target of the Dependency object to the a string that is "name | cid-v1:{GUID of the future app insights app id}"
+        - Set the Target of the Dependency object to the a string that is "name-of-future-app-insights-account | cid-v1:{GUID of the future app insights app id}"
         - Set the Telemetry Operation Id (Service Bus JSON payload: Traceoperation)
         - Set the Telemetry Operation Parent Id to the Request Telemetry Id
     - The function will trigger an Azure Data Factory job via REST API
